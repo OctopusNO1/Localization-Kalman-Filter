@@ -8,7 +8,7 @@ GPS，IMU，lidar
 ### by pycharm：
 1. open pycharm, check out from version control/git, enter **URL**
 2. set local or virtual(can inherit from local) environment/**interpretor**
-    - python and java are both compile and interpret, like jvm and virtualenv
+    - python and java are both compile and interpret languages, like jvm and virtualenv
 3. alt+enter install package
 
 ## reference：
