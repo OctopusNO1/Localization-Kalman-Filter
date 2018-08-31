@@ -13,7 +13,7 @@ def load_data(data_length):
     velocity_series = Compute.kmh_kms(data_frame.loc[:, '实际车速km/h'])   # kms
 
     steering_wheel_angle_series = data_frame.loc[:, '当前转角°']    # 方向盘转角
-    # 15000, 26000
+    # 15000, 26000中间点
     # # 头尾较好，中间波折
     # steering_wheel_angle_series -= 1.3
     # wheel_steering_angle_series = Compute.deg_rad(-steering_wheel_angle_series/17)   # 前轮转角，rad
