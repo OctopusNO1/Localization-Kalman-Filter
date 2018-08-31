@@ -20,6 +20,7 @@ def load_data(data_length):
     # 开头较好
     steering_wheel_angle_series -= 1.21
     wheel_steering_angle_series = Compute.deg_rad(-steering_wheel_angle_series/21)   # 前轮转角，rad
+
     longitude_series = data_frame.loc[:, '经度°']
     latitude_series = data_frame.loc[:, '纬度°']
     return second_series, velocity_series, wheel_steering_angle_series, longitude_series, latitude_series

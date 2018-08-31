@@ -11,7 +11,7 @@ from tools import Compute, Data
 yaw_init = 3.00
 wheelbase = 0.003  # km
 
-data_length = 13000
+data_length = 1300
 second_series, velocity_series, steering_angle_series, longitude_series, latitude_series = Data.load_data(data_length)
 
 longitude_pre_list = [longitude_series[0]]
