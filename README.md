@@ -3,13 +3,13 @@ robot localization by kalman filter
 This is not only a readme for you, but also a summary for myself.
 
 ## multi-sensor fusion localization：
-GPS  
-IMU: motion model/kalman filter predict  
+1. GPS  
+2. IMU: motion model/kalman filter predict  
     - α: wheel turn angle=steer wheel turn angle/k
     - turn angle: β=distance/wheelbase*tan(α) （rad）  
     - turn radius: R=d/β=w/tan(α) （km）  
 ![image alt text](images/bicycle_model.png)  
-range system: lidar  
+3. range system: lidar  
 
 ## how to use?
 ### by pycharm：
