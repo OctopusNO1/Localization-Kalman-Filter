@@ -4,8 +4,12 @@ This is not only a readme for you, but also a summary for myself.
 
 ## multi-sensor fusion localization：
 GPS  
-IMU: motion/kalman filter predict  
-range system: lidar
+IMU: motion model/kalman filter predict  
+    - α: wheel turn angle=steer wheel turn angle/k
+    - turn angle: β=distance/wheelbase*tan(α) （rad）  
+    - turn radius: R=d/β=w/tan(α) （km）  
+![image alt text](images/bicycle_model.png)  
+range system: lidar  
 
 ## how to use?
 ### by pycharm：
@@ -28,3 +32,5 @@ range system: lidar
 ## reference：
 https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python<br>
 https://github.com/ApolloAuto/apollo
+https://github.com/OctopusNO1/UdaProject-Extended-Kalman-Filter
+

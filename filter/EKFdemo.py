@@ -9,14 +9,10 @@ import numpy as np
 from numpy.random import randn
 
 
-# residual = z - h(x)
-# h is nonlinear, don't need to linearize
-
-
 def H_of(x, landmark_pos):
     """ compute Jacobian of H matrix where h(x) computes
     the range and bearing to a landmark for state x
-    """
+     """
     px = landmark_pos[0]
     py = landmark_pos[1]
     hyp = (px - x[0, 0])**2 + (py - x[1, 0])**2
@@ -182,7 +178,8 @@ def run_localization(landmarks, std_vel, std_steer,
     return ekf
 
 
-landmarkslandmark  = array([[5, 10], [10, 5], [15, 15]])
+landmarks = array([[5, 10], [10, 5], [15, 15]])
+
 
 ekf = run_localization(
     landmarks, std_vel=0.1, std_steer=np.radians(1),
