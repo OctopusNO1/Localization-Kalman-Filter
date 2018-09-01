@@ -1,6 +1,5 @@
 # Localization-Kalman-Filter
 robot localization by kalman filter  
-This is not only a readme for you, but also a summary for myself.
 
 ## multi-sensor fusion localization：
 1. GPS  
