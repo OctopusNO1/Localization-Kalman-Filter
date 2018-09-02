@@ -15,9 +15,10 @@ def run_localization(std_vel, std_steer, std_lo, std_la,
     ekf_.P = np.diag([0.001, 0.001, 11.1])    # yaw uncertain
     ekf_.R = np.diag([std_lo ** 2, std_la ** 2])    # measure uncertain
     # adapt
-    Q_scale_factor = 1000.
-    eps_max = 4.
-    count = 0
+    Q_scale_factor = 9999.
+    R_scale_factor = 9999.
+    eps_max = 0.000001     # threshold一般是4，因为residual>2*standard
+    imu_count = 0   # IMU惯性导航
 
     predicts = [ekf_.x]
     estimates = [ekf_.x]
@@ -34,15 +35,21 @@ def run_localization(std_vel, std_steer, std_lo, std_la,
         # update
         ekf_.update_gps(z=zs[i])
 
-        # adapt: adjust Q,R by residual and measure covariance, y^2/S>threshold
+        # adapt: adjust Q,R by residual and measure covariance,
+        # y^2/S>threshold，即|y|>k*std, S is std^2
         y, S = ekf_.y, ekf_.S
         eps = np.dot(y.T, inv(S)).dot(y)
-        if eps > eps_max:
-            ekf_.Q *= Q_scale_factor
-            count += 1
-        elif count > 0:
-            ekf_.Q /= Q_scale_factor
-            count -= 1
+        if eps > eps_max:   # residual big-->GPS error-->R big
+            # 如何判断是GPS异常还是IMU异常？
+            # ekf_.Q *= Q_scale_factor  # IMU异常-->加大Q
+            ekf_.R *= R_scale_factor    # GPS异常-->加大R
+            # imu_count += 100    # 2s
+            print(i, ': GPS信号异常')
+        # elif imu_count > 0:
+        #     ekf_.Q /= Q_scale_factor
+        #     ekf_.R /= R_scale_factor
+        #     imu_count -= 1
+        #     print('adapt small')
 
         estimates.append(ekf_.x)
         # 画出update后的协方差椭圆
