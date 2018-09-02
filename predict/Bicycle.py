@@ -11,10 +11,10 @@ from tools import Compute, Data
 yaw_init = 3.00
 wheelbase = 0.003  # km
 
-data_length = 130000
-second_series, velocity_series, wheel_steering_angle_series, longitude_series, latitude_series\
+data_length = 13000
+second_series, velocity_series, wheel_angle_series, longitude_series, latitude_series\
     = Data.load_data(data_length)
-
+print(wheel_angle_series)
 longitude_pre_list = [longitude_series[0]]
 latitude_pre_list = [latitude_series[0]]
 yaw_pre_list = [yaw_init]
@@ -27,10 +27,10 @@ for i in range(data_length - 1):  # predict less first
 
     # print(i, 'steering angle', steering_angle_series[i])
     # bicycle model
-    if abs(wheel_steering_angle_series[i]) > 0.000001:  # is turn?    1d=0.017rad
+    if abs(wheel_angle_series[i]) > 0.000001:  # is turn?    1d=0.017rad
         # 方向盘转角-->车辆转向角
-        turn_angle = distance / wheelbase * tan(wheel_steering_angle_series[i])   # rad, wheelbase?
-        turn_radius_km = wheelbase / tan(wheel_steering_angle_series[i])     # km
+        turn_angle = distance / wheelbase * tan(wheel_angle_series[i])   # rad, wheelbase?
+        turn_radius_km = wheelbase / tan(wheel_angle_series[i])     # km
         turn_radius_lo = Compute.km_lo(turn_radius_km, latitude_series[i])
         turn_radius_la = Compute.km_la(turn_radius_km)
         # print('turn: ', turn_angle)

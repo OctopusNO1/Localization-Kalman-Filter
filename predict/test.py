@@ -13,33 +13,33 @@ class RobotEKF:
         self.wheelbase = wheelbase
 
     # predict使用的motion model
-    def move(self, x, u, dt):
+    def move(self, x, u, dt=0.02):
         latitude = x[1, 0]
-        hdg = x[2, 0]   # yaw, rad
-        vel = u[0]  # velocity km/h
-        steering_angle = u[1]   # 前轮angle rad
+        yaw = x[2, 0]  # rad
+        vel = u[0]  # km/s
+        wheel_angle = u[1]  # 前轮 angle, rad
+        dist = vel * dt  # km
 
-        dist = vel * dt     # km
+        if abs(wheel_angle) > 0.000001:  # is robot turning?
+            turn_angle = (dist / wheelbase) * tan(wheel_angle)  # rad
+            turn_radius = wheelbase / tan(wheel_angle)  # km
 
-        if abs(steering_angle) > 0.000001:  # is robot turning?
-            beta = (dist / self.wheelbase) * tan(steering_angle)    # turn angle, rad
-            r = self.wheelbase / tan(steering_angle)  # turn radius, km
-            r_lo = Compute.km_lo(r, latitude)
-            r_la = Compute.km_la(r)
+            r_lo = Compute.km_lo(turn_radius, latitude)
+            r_la = Compute.km_la(turn_radius)
 
-            dx = np.array([[-r_lo * sin(hdg) + r_lo * sin(hdg + beta)],
-                           [r_la * cos(hdg) - r_la * cos(hdg + beta)],
-                           [beta]])
+            dx = np.array([[-r_lo * sin(yaw) + r_lo * sin(yaw + turn_angle)],
+                           [r_la * cos(yaw) - r_la * cos(yaw + turn_angle)],
+                           [turn_angle]])
         else:  # moving in straight line
-            dx = np.array([[Compute.km_lo(dist * cos(hdg), latitude)],
-                           [Compute.km_la(dist * sin(hdg))],
+            dx = np.array([[Compute.km_lo(dist * cos(yaw), latitude)],
+                           [Compute.km_la(dist * sin(yaw))],
                            [0]])
         return x + dx
 
 
 yaw_init = 3.00
 wheelbase = 0.003  # km
-data_length = 130000
+data_length = 13000
 second_series, velocity_series, wheel_steering_angle_series, longitude_series, latitude_series\
     = Data.load_data(data_length)
 init_x = array([[longitude_series[0]], [latitude_series[0]], [yaw_init]])

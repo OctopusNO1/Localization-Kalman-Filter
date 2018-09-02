@@ -142,7 +142,7 @@ def run_localization(landmarks, std_vel, std_steer,
     # steering command (vel, steering angle radians)
     u = array([1.1, .01])
 
-    plt.figure()
+    # plt.figure()
     plt.scatter(landmarks[:, 0], landmarks[:, 1],
                 marker='s', s=60)
 
@@ -171,7 +171,7 @@ def run_localization(landmarks, std_vel, std_steer,
                     std=6, facecolor='g', alpha=0.8)
     track = np.array(track)
     plt.plot(track[:, 0], track[:, 1], color='k', lw=2)
-    plt.axis('equal')
+    # plt.axis('equal')
     plt.title("EKF Robot localization")
     if ylim is not None: plt.ylim(*ylim)
     plt.show()
