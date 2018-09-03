@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 from tools import Compute, Data
 
 
+''' GPS不准，process未知？
+    
+'''
 ''' bicycle model
     steering wheel angle-->front tire angle-->turn angle
 '''
@@ -13,7 +16,7 @@ wheelbase = 0.003  # km
 
 data_length = 130000
 second_series, velocity_series, wheel_angle_series, longitude_series, latitude_series\
-    = Data.load_data(data_length)
+    = Data.load_data(data_length, correction=1.3, conversion=17)
 longitude_pre_list = [longitude_series[0]]
 latitude_pre_list = [latitude_series[0]]
 yaw_pre_list = [yaw_init]

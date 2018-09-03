@@ -3,7 +3,7 @@ from numpy import array
 from numpy.linalg import inv
 from filterpy.stats import plot_covariance_ellipse
 
-from filter.EKF import EKF
+from filter_ekf.EKF import EKF
 
 
 def run_localization(std_vel, std_steer, std_lo, std_la,
@@ -15,7 +15,7 @@ def run_localization(std_vel, std_steer, std_lo, std_la,
     ekf_.P = np.diag([0.001, 0.001, 11.1])    # yaw uncertain
     ekf_.R = np.diag([std_lo ** 2, std_la ** 2])    # measure uncertain
     # adapt
-    Q_scale_factor = 9999.
+    # Q_scale_factor = 9999.
     R_scale_factor = 9999.
     eps_max = 0.000001     # threshold一般是4，因为residual>2*standard
     imu_count = 0   # IMU惯性导航
@@ -35,7 +35,7 @@ def run_localization(std_vel, std_steer, std_lo, std_la,
         # update
         ekf_.update_gps(z=zs[i])
 
-        # adapt: adjust Q,R by residual and measure covariance,
+        # adapt: adjust Q,R by residual and predict/measure covariance,
         # y^2/S>threshold，即|y|>k*std, S is std^2
         y, S = ekf_.y, ekf_.S
         eps = np.dot(y.T, inv(S)).dot(y)

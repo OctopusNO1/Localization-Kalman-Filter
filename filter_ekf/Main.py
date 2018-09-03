@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 
 from tools import Data
-from filter.Fusion import *
+from filter_ekf.Fusion import *
 
 
 yaw_init = 3.00
@@ -12,6 +12,8 @@ data_length = 1300
 
 # load data
 _, _, _, true_longitude_series, true_latitude_series = Data.load_data(data_length)
+# second_series, velocity_series, wheel_angle_series, longitude_series, latitude_series\
+#     = Data.load_noise_data(data_length, correction=1.3, conversion=17)
 second_series, velocity_series, wheel_angle_series, longitude_series, latitude_series\
     = Data.load_noise_data(data_length)
 
