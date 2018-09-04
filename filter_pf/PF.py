@@ -9,6 +9,8 @@ from numpy.linalg import norm
 from numpy.random import seed
 from filterpy.monte_carlo import systematic_resample
 
+from tools import Compute
+from tools import Data
 
 ''' particle——state(x, y, yaw)
     
@@ -48,26 +50,31 @@ def create_gaussian_particles(mean, std, N):
     return particles
 
 
-def predict(particles, u, std, dt=1.):
+def predict(particles, u, std, dt=0.02):
     """
     move participles，不需要准确的motion model
-    according to control input u (heading change, velocity)
-    with noise Q (std heading change, std velocity)`
+    according to control input with noise Q
     :param particles:
-    :param u:
-    :param std: 标准差，Q
-    :param dt:
-    :return:
+    :param u: (heading change, velocity)
+    :param std: 标准差，Q(std heading change, std velocity)
+    :param dt: default 0.02， 根据data算的更精确
+    :return: none
     """
     N = len(particles)
-    # update heading
+    # update heading车辆转角，不准
     particles[:, 2] += u[0] + (randn(N) * std[0])
     particles[:, 2] %= 2 * np.pi
 
     # move in the (noisy) commanded direction
-    dist = (u[1] * dt) + (randn(N) * std[1])
-    particles[:, 0] += np.cos(particles[:, 2]) * dist
-    particles[:, 1] += np.sin(particles[:, 2]) * dist
+    # N个不同的distance
+    dist = (u[1] * dt) + (randn(N) * std[1])    # km
+    # predict时不知道true latitude
+    # 用各个particle的latitude——int/list
+    for i in range(len(particles)):
+        yaw = np.cos(particles[i, 2])
+        dist_lo = Compute.km_lo(dist[i], particles[i, 1])
+        particles[i, 0] += yaw * dist_lo   # km-->经度
+    particles[:, 1] += np.sin(particles[:, 2]) * dist/111   # km-->纬度
 
 
 def update(particles, weights, z, R, landmarks):
@@ -77,7 +84,7 @@ def update(particles, weights, z, R, landmarks):
     :param weights:
     :param z: measurements：distance between robot and landmarks
     :param R: measure covariance
-    :param landmarks: (x,y)
+    :param landmarks: (x,y)*N
     :return:
     """
     weights.fill(1.)
@@ -94,7 +101,8 @@ def estimate(particles, weights):
 
     :param particles: states(x, y, yaw)*N
     :param weights:
-    :return: mean, variance
+    :return: mean
+            variance
     """
     """returns mean and variance of the weighted particles"""
     pos = particles[:, 0:2]
@@ -136,22 +144,25 @@ def resample_from_index(particles, weights, indexes):
     weights.fill (1.0 / len(weights))
 
 
-def run_pf1(N, iters=18, sensor_std_err=.1,
-            plot_particles=False,
-            xlim=(0, 20), ylim=(0, 20),
+def run_pf1(N, iters=13, sensor_std_err=0.0000001,
+            plot_particles=False, is_lim=False,
+            xlim=(117.21, 117.31), ylim=(39.11, 39.21),
             initial_x=None):
     '''
 
     :param N: 粒子数量
     :param iters: data length
-    :param sensor_std_err: measurement/sensor standard
-    :param plot_particles: 是否画出粒子
+    :param sensor_std_err: measurement/sensor standard测量的准不准？
+    :param plot_particles: 是否画出粒子堆
     :param xlim: x刻度
     :param ylim: y刻度
     :param initial_x: 知道初始位置就gaussian，不知道就均匀分布
     :return: none
     '''
-    landmarks = np.array([[-1, 2], [5, 10], [12, 14], [18, 21]])
+    landmarks = np.array([[117.3005, 39.1160], [117.2995, 39.1160], [117.2985, 39.1160], [117.2975, 39.1160],
+                          [117.3005, 39.1170], [117.2995, 39.1170], [117.2985, 39.1170], [117.2975, 39.1170],
+                          [117.2965, 39.1160], [117.2960, 39.1160], [117.2955, 39.1160], [117.2950, 39.1160],
+                          [117.2965, 39.1170], [117.2960, 39.1170], [117.2955, 39.1170], [117.2950, 39.1170]])
     NL = len(landmarks)
 
     plt.figure()
@@ -159,33 +170,41 @@ def run_pf1(N, iters=18, sensor_std_err=.1,
     # create particles and weights
     if initial_x is not None:   # 有最初的x就创建gaussian，std与Q
         particles = create_gaussian_particles(
-            mean=initial_x, std=(5, 5, np.pi / 4), N=N)
+            mean=initial_x, std=(0.00001, 0.00001, np.pi / 8), N=N)
     else:
-        particles = create_uniform_particles((0, 20), (0, 20), (0, 6.28), N)
+        particles = create_uniform_particles((117.21, 117.31), (39.11, 39.21), (0, np.pi*2), N)
     weights = np.zeros(N)
 
-    # 画出初始化的透明粒子
+    # 画出初始化的透明粒子，画出地标
     if plot_particles:
         alpha = .20
         if N > 5000:
             alpha *= np.sqrt(5000) / np.sqrt(N)
         plt.scatter(particles[:, 0], particles[:, 1],
                     alpha=alpha, color='g')
+        plt.scatter(landmarks[:, 0], landmarks[:, 1], marker='s', s=60)
 
     xs = []     # estimate x
-    robot_pos = np.array([0., 0.])  # true position
-    for x in range(iters):
-        robot_pos += (1, 1)     # 模拟true move
+    dt_series, turn_angle_series, velocity_series, longitude_series, latitude_series\
+        = Data.load_process_data(data_length=iters, correction=1.3, conversion=17)     # true position
 
+    true_pos, us = [], []  # array([[longitude], [latitude]])
+    for (turn_angle, velocity, longitude, latitude) in zip(turn_angle_series, velocity_series, longitude_series, latitude_series):
+        true_pos.append([longitude, latitude])
+        us.append([turn_angle, velocity])
+    true_pos = np.array(true_pos)
+    us = np.array(us)
+
+    for i in range(iters):
         # distance from robot to each landmark
-        zs = (norm(landmarks - robot_pos, axis=1) +
+        zs = (norm(landmarks - true_pos[i], axis=1) +
               (randn(NL) * sensor_std_err))
 
         # move diagonally forward to (x+1, x+1)
-        predict(particles, u=(0.00, 1.414), std=(.2, .05))
+        predict(particles, u=us[i], std=(0.2, 0.05), dt=dt_series[i])   # predict的置信度
 
         # incorporate measurements
-        update(particles, weights, z=zs, R=sensor_std_err,
+        update(particles, weights, z=zs, R=sensor_std_err,  # measure的置信度
                landmarks=landmarks)
 
         # resample if too few effective particles
@@ -196,19 +215,23 @@ def run_pf1(N, iters=18, sensor_std_err=.1,
         mu, var = estimate(particles, weights)
         xs.append(mu)
 
-        # 画出estimate后的粒子
+        # 画出estimate后的粒子堆
         if plot_particles:
             plt.scatter(particles[:, 0], particles[:, 1],
                         color='k', marker=',', s=1)
-        p1 = plt.scatter(robot_pos[0], robot_pos[1], marker='+',
-                         color='k', s=180, lw=3)
-        p2 = plt.scatter(mu[0], mu[1], marker='s', color='r')
+
+        # 画出真实位置点+
+        p1 = plt.scatter(true_pos[i, 0], true_pos[i, 1], marker='+',
+                         color='k', s=180, lw=1, label='true')
+        # 画出estimate位置点
+        p2 = plt.scatter(mu[0], mu[1], marker='s', color='r', label='estimate')
 
     # xs = np.array(xs)
     # plt.plot(xs[:, 0], xs[:, 1])
     plt.legend([p1, p2], ['Actual', 'PF'], loc=4, numpoints=1)
-    plt.xlim(*xlim)
-    plt.ylim(*ylim)
+    if is_lim:
+        plt.xlim(*xlim)
+        plt.ylim(*ylim)
     print('final position error, variance:\n\t', mu - np.array([iters, iters]), var)
     plt.show()
 
@@ -216,9 +239,9 @@ def run_pf1(N, iters=18, sensor_std_err=.1,
 # seed(2)
 # run_pf1(N=5000, plot_particles=False)
 #
-seed(2)
-run_pf1(N=5000, iters=8, plot_particles=True,
-        xlim=(0, 8), ylim=(0, 8))
+# seed(2)
+# run_pf1(N=5000, iters=8, plot_particles=True,
+#         xlim=(0, 8), ylim=(0, 8))
 
 # seed(2)
 # run_pf1(N=100000, iters=8, plot_particles=True,
@@ -227,5 +250,5 @@ run_pf1(N=5000, iters=8, plot_particles=True,
 # seed(6)
 # run_pf1(N=5000, plot_particles=True, ylim=(-20, 20))
 
-# seed(6)
-# run_pf1(N=5000, plot_particles=True, initial_x=(1,1, np.pi/4))
+seed(6)
+run_pf1(N=5000, iters=130, plot_particles=False, initial_x=(117.301701, 39.116025, 3), is_lim=False)

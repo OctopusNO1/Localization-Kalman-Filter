@@ -1,20 +1,20 @@
 
 from math import sin, cos, tan
+import numpy as np
 import matplotlib.pyplot as plt
 
 from tools import Compute, Data
 
 
-''' GPS不准，process未知？
-    
-'''
+''' GPS不准，process不准/未知？
+    PF'''
 ''' bicycle model
     steering wheel angle-->front tire angle-->turn angle
 '''
 yaw_init = 3.00
 wheelbase = 0.003  # km
 
-data_length = 130000
+data_length = 1300
 second_series, velocity_series, wheel_angle_series, longitude_series, latitude_series\
     = Data.load_data(data_length, correction=1.3, conversion=17)
 longitude_pre_list = [longitude_series[0]]
@@ -59,7 +59,13 @@ print('latitude rmse', Compute.root_mean_square_error(latitude_series, latitude_
 
 plt.scatter(longitude_series, latitude_series, label='measure')
 plt.scatter(longitude_pre_list, latitude_pre_list, label='predict')
+landmarks = np.array([[117.3005, 39.1160], [117.2995, 39.1160], [117.2985, 39.1160], [117.2975, 39.1160],
+                      [117.3005, 39.1170], [117.2995, 39.1170], [117.2985, 39.1170], [117.2975, 39.1170]])
+# [117.274, 39.125], [117.261, 39.126], [117.257, 39.150], [117.269, 39.147]
+plt.scatter(landmarks[:, 0], landmarks[:, 1], marker='s', s=60)
 plt.legend()
+# plt.xlim(*(117.21, 117.31))
+# plt.ylim(*(39.11, 39.21))
 plt.show()
 
 
