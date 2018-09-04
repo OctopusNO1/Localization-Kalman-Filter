@@ -150,13 +150,14 @@ def run_pf1(N, iters=13, sensor_std_err=0.0000001,
             initial_x=None):
     '''
 
-    :param N: 粒子数量
+    :param N: 粒子数量，越大越可能落在正确位置。
     :param iters: data length
-    :param sensor_std_err: measurement/sensor standard测量的准不准？
+    :param sensor_std_err: measurement/sensor standard测量的准不准，越小测量越准。
     :param plot_particles: 是否画出粒子堆
+    :param is_lim: 是否规范刻度
     :param xlim: x刻度
     :param ylim: y刻度
-    :param initial_x: 知道初始位置就gaussian，不知道就均匀分布
+    :param initial_x: 知道初始位置就gaussian分布，不知道就均匀分布
     :return: none
     '''
     landmarks = np.array([[117.3005, 39.1160], [117.2995, 39.1160], [117.2985, 39.1160], [117.2975, 39.1160],
@@ -168,6 +169,7 @@ def run_pf1(N, iters=13, sensor_std_err=0.0000001,
     plt.figure()
 
     # create particles and weights
+    # 是否gaussian
     if initial_x is not None:   # 有最初的x就创建gaussian，std与Q
         particles = create_gaussian_particles(
             mean=initial_x, std=(0.00001, 0.00001, np.pi / 8), N=N)
@@ -184,10 +186,8 @@ def run_pf1(N, iters=13, sensor_std_err=0.0000001,
                     alpha=alpha, color='g')
         plt.scatter(landmarks[:, 0], landmarks[:, 1], marker='s', s=60)
 
-    xs = []     # estimate x
     dt_series, turn_angle_series, velocity_series, longitude_series, latitude_series\
         = Data.load_process_data(data_length=iters, correction=1.3, conversion=17)     # true position
-
     true_pos, us = [], []  # array([[longitude], [latitude]])
     for (turn_angle, velocity, longitude, latitude) in zip(turn_angle_series, velocity_series, longitude_series, latitude_series):
         true_pos.append([longitude, latitude])
@@ -195,12 +195,13 @@ def run_pf1(N, iters=13, sensor_std_err=0.0000001,
     true_pos = np.array(true_pos)
     us = np.array(us)
 
+    xs = []  # estimate x
     for i in range(iters):
-        # distance from robot to each landmark
+        # 模拟测量distance from robot to each landmark
         zs = (norm(landmarks - true_pos[i], axis=1) +
               (randn(NL) * sensor_std_err))
 
-        # move diagonally forward to (x+1, x+1)
+        # move
         predict(particles, u=us[i], std=(0.2, 0.05), dt=dt_series[i])   # predict的置信度
 
         # incorporate measurements
@@ -250,5 +251,5 @@ def run_pf1(N, iters=13, sensor_std_err=0.0000001,
 # seed(6)
 # run_pf1(N=5000, plot_particles=True, ylim=(-20, 20))
 
-seed(6)
-run_pf1(N=5000, iters=130, plot_particles=False, initial_x=(117.301701, 39.116025, 3), is_lim=False)
+# seed(6)     # sample particles/随机数生成器（系统模拟现实中的随机），控制hash
+run_pf1(N=50000, iters=130000, plot_particles=False, initial_x=(117.301701, 39.116025, 3), is_lim=False)
