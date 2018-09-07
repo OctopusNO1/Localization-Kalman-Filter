@@ -11,19 +11,21 @@ from tools import Compute, Data
 yaw_init = 3.00
 wheelbase = 0.003  # km
 
-data_length = 130000
+data_length = 20000
 second_series, velocity_series, wheel_angle_series, longitude_series, latitude_series\
-    = Data.load_data(data_length)
+    = Data.load_data(data_length, correction=1.3, conversion=17)
 longitude_pre_list = [longitude_series[0]]
 latitude_pre_list = [latitude_series[0]]
 yaw_pre_list = [yaw_init]
+print(0, '时刻，经度：', longitude_series[0])
+print(0, '时刻，纬度：', latitude_series[0])
+print(0, '时刻，航向：', yaw_init)
 
 print('start')
 for i in range(data_length - 1):  # predict less first
     dt = second_series[i + 1] - second_series[i]
     distance = velocity_series[i] * dt  # km
 
-    # print(i, 'steering angle', steering_angle_series[i])
     # bicycle model
     if abs(wheel_angle_series[i]) > 0.000001:  # is turn?    1d=0.017rad
         # 方向盘转角-->车辆转向角
@@ -46,6 +48,10 @@ for i in range(data_length - 1):  # predict less first
             (distance * sin(yaw_pre_list[i])))
         yaw_pre = yaw_pre_list[i]
 
+    print(i+1, '时刻，经度：', longitude_pre)
+    print(i+1, '时刻，纬度：', latitude_pre)
+    print(i+1, '时刻，航向：', yaw_init)
+
     longitude_pre_list.append(longitude_pre)
     latitude_pre_list.append(latitude_pre)
     yaw_pre_list.append(yaw_pre)
@@ -58,5 +64,4 @@ plt.scatter(longitude_series, latitude_series, label='measure')
 plt.scatter(longitude_pre_list, latitude_pre_list, label='predict')
 plt.legend()
 plt.show()
-
 

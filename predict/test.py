@@ -39,7 +39,7 @@ class RobotEKF:
 
 yaw_init = 3.00
 wheelbase = 0.003  # km
-data_length = 13000
+data_length = 15000
 second_series, velocity_series, wheel_steering_angle_series, longitude_series, latitude_series\
     = Data.load_data(data_length)
 init_x = array([[longitude_series[0]], [latitude_series[0]], [yaw_init]])

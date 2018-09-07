@@ -8,7 +8,7 @@ from filter_ekf.Fusion import *
 yaw_init = 3.00
 wheelbase = 0.003  # km
 dt = 0.02
-data_length = 1300
+data_length = 15000
 
 # load data
 _, _, _, true_longitude_series, true_latitude_series = Data.load_data(data_length)

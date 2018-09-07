@@ -252,4 +252,4 @@ def run_pf1(N, iters=13, sensor_std_err=0.0000001,
 # run_pf1(N=5000, plot_particles=True, ylim=(-20, 20))
 
 # seed(6)     # sample particles/随机数生成器（系统模拟现实中的随机），控制hash
-run_pf1(N=50000, iters=130000, plot_particles=False, initial_x=(117.301701, 39.116025, 3), is_lim=False)
+run_pf1(N=50000, iters=15000, plot_particles=False, initial_x=(117.301701, 39.116025, 3), is_lim=False)

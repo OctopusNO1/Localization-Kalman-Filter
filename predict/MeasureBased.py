@@ -9,7 +9,7 @@ from tools import Compute, Data
     x_ = x + v * cos_yaw * dt
     yaw is based on measurements
 '''
-data_length = 1300
+data_length = 130000
 second_series, velocity_series, _, longitude_series, latitude_series = Data.load_data(data_length)
 
 longitude_pre_list = [longitude_series[0]]
