@@ -8,10 +8,10 @@ from tools import Compute, Data
 ''' wheel velocity
     turn angle = (wheel_right - wheel_left) / wheelbase *dt
 '''
-yaw_init = 3.00
-wheelbase = 0.003  # km
+yaw_init = 3.00     # rad
+wheelbase = 0.003   # km
 
-data_length = 1300
+data_length = 13000
 second_series, velocity_series, car_steering_velocity_series, longitude_series, latitude_series\
     = Data.load_wheel_data(data_length, wheelbase=wheelbase)
 

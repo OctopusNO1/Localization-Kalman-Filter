@@ -1,5 +1,5 @@
 import pandas as pd
-from numpy import tan
+from numpy import tan, pi
 
 from tools import Compute
 
@@ -56,13 +56,13 @@ def load_wheel_data(data_length, wheelbase=0.003):
 
     front_left_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'FL'])  # kms
     front_right_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'FR'])
-    front_wheel_steer_velocity_s = (-front_right_wheel_velocity_series + front_left_wheel_velocity_series) / wheelbase
-
-    rear_left_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'RL'])
-    rear_right_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'RR'])
-    rear_wheel_steer_velocity_s = (-rear_right_wheel_velocity_series + rear_left_wheel_velocity_series) / wheelbase
-
-    car_steering_velocity_series = (front_wheel_steer_velocity_s + rear_wheel_steer_velocity_s) / 2
+    front_wheel_steer_velocity_s = (front_right_wheel_velocity_series - front_left_wheel_velocity_series) / wheelbase
+    car_steering_velocity_series = front_wheel_steer_velocity_s
+    # rear_left_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'RL'])
+    # rear_right_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'RR'])
+    # rear_wheel_steer_velocity_s = (rear_right_wheel_velocity_series - rear_left_wheel_velocity_series) / wheelbase
+    #
+    # car_steering_velocity_series = (front_wheel_steer_velocity_s + rear_wheel_steer_velocity_s) / 2
 
     longitude_series = data_frame.loc[:, '经度°']
     latitude_series = data_frame.loc[:, '纬度°']
