@@ -5,7 +5,7 @@ from tools import Compute
 
 
 # predict使用的motion model
-def move(x, u, dt=0.02, wheelbase=0.003):
+def move(x, u, dt, wheelbase=0.003):
     latitude = x[1, 0]
     yaw = x[2, 0]  # rad
     vel = u[0]  # km/s

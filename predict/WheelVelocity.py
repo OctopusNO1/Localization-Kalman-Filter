@@ -8,12 +8,12 @@ from tools import Compute, Data
 ''' wheel velocity
     turn angle = (wheel_right - wheel_left) / wheelbase *dt
 '''
-yaw_init = 3.00     # rad
-wheelbase = 0.003   # km
+yaw_init = 3.50     # rad,3.5
+wheelbase = 0.0015   # km，轮距
 
 data_length = 13000
 second_series, velocity_series, car_steering_velocity_series, longitude_series, latitude_series\
-    = Data.load_wheel_data(data_length, wheelbase=wheelbase)
+    = Data.load_wheel_data(data_length, wheelbase=wheelbase, data_name='../log/log_gps_H9_BLACK_20180902 230927.txt')
 
 longitude_pre_list = [longitude_series[0]]
 latitude_pre_list = [latitude_series[0]]
@@ -24,13 +24,12 @@ for i in range(data_length-1):  # predict less first
     # motion cos sin
     dt = second_series[i + 1] - second_series[i]
     car_steer_angle = car_steering_velocity_series[i] * dt
-    yaw_pre = yaw_pre_list[i] + car_steer_angle
 
     longitude_pre = longitude_pre_list[i] + Compute.km_lo(
-        (velocity_series[i] * cos(yaw_pre) * dt), latitude_series[i])
+        (velocity_series[i] * cos(yaw_pre_list[i]) * dt), latitude_series[i])
     latitude_pre = latitude_pre_list[i] + Compute.km_la(
-        (velocity_series[i] * sin(yaw_pre) * dt))
-
+        (velocity_series[i] * sin(yaw_pre_list[i]) * dt))
+    yaw_pre = yaw_pre_list[i] + car_steer_angle
     # # bicycle， wheel
     # dt = second_series[i + 1] - second_series[i]
     # distance = velocity_series[i] * dt  # km

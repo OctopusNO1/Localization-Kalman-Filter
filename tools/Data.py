@@ -1,5 +1,6 @@
 import pandas as pd
 from numpy import tan, pi
+import random
 
 from tools import Compute
 
@@ -32,8 +33,8 @@ def load_data(data_length, correction=1.21, conversion=21, data_name='../data.tx
     return second_series, velocity_series, wheel_angle_series, longitude_series, latitude_series
 
 
-def load_noise_data(data_length, correction=1.21, conversion=21):
-    data_frame = pd.read_table('../data.txt', header=0, delim_whitespace=True, nrows=data_length)
+def load_noise_data(data_length, correction=1.21, conversion=21, data_name='../data.txt'):
+    data_frame = pd.read_table(data_name, header=0, delim_whitespace=True, nrows=data_length)
     second_series = data_frame.loc[:, '秒数']
     velocity_series = Compute.kmh_kms(data_frame.loc[:, '实际车速km/h'])  # kms
 
@@ -44,25 +45,39 @@ def load_noise_data(data_length, correction=1.21, conversion=21):
 
     longitude_series = data_frame.loc[:, '经度°']
     latitude_series = data_frame.loc[:, '纬度°']
-    # 模拟错误GPS信号
-    latitude_series[6000:9000] += 0.001
+    # 模拟错误GPS信号：
+    # 1、纬度偏离
+    # latitude_series[6000:9000] += 0.001
+    # 2、逐渐偏离
+    # for i in range(2000):
+    #     latitude_series[12000+i] -= 0.0000005*i
+    # latitude_series[14000:16000] -= 0.001
+    # for i in range(1000):
+    #     latitude_series[16000+i] -= 0.000001*(1000-i)
+    # 3、noise
+    for i in range(3000):
+        latitude_series[12000+i] += random.gauss(0, 0.0001)
     return second_series, velocity_series, wheel_angle_series, longitude_series, latitude_series
 
 
-def load_wheel_data(data_length, wheelbase=0.003):
-    data_frame = pd.read_table('../data.txt', header=0, delim_whitespace=True, nrows=data_length)
+def load_wheel_data(data_length, wheelbase=0.0015, data_name='../data.txt'):
+    data_frame = pd.read_table(data_name, header=0, delim_whitespace=True, nrows=data_length)
     second_series = data_frame.loc[:, '秒数']
-    velocity_series = Compute.kmh_kms(data_frame.loc[:, '实际车速km/h'])   # kms
+    # velocity_series = Compute.kmh_kms(data_frame.loc[:, '实际车速km/h'])   # kms
 
     front_left_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'FL'])  # kms
     front_right_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'FR'])
+    rear_left_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'RL'])
+    rear_right_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'RR'])
+
+    velocity_series = (front_left_wheel_velocity_series + front_right_wheel_velocity_series +
+                       rear_left_wheel_velocity_series + rear_right_wheel_velocity_series) / 4
+
     front_wheel_steer_velocity_s = (front_right_wheel_velocity_series - front_left_wheel_velocity_series) / wheelbase
-    car_steering_velocity_series = front_wheel_steer_velocity_s
-    # rear_left_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'RL'])
-    # rear_right_wheel_velocity_series = Compute.kmh_kms(data_frame.loc[:, 'RR'])
-    # rear_wheel_steer_velocity_s = (rear_right_wheel_velocity_series - rear_left_wheel_velocity_series) / wheelbase
-    #
-    # car_steering_velocity_series = (front_wheel_steer_velocity_s + rear_wheel_steer_velocity_s) / 2
+    # car_steering_velocity_series = front_wheel_steer_velocity_s
+    rear_wheel_steer_velocity_s = (rear_right_wheel_velocity_series - rear_left_wheel_velocity_series) / wheelbase
+    # car_steering_velocity_series = rear_wheel_steer_velocity_s
+    car_steering_velocity_series = (front_wheel_steer_velocity_s + rear_wheel_steer_velocity_s) / 2
 
     longitude_series = data_frame.loc[:, '经度°']
     latitude_series = data_frame.loc[:, '纬度°']

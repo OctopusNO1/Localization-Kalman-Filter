@@ -8,18 +8,18 @@ from tools import Compute, Data
 ''' bicycle model
     steering wheel angle-->front tire angle-->turn angle
 '''
-yaw_init = 3.00
+yaw_init = 3.33     # 3.33, 16.3
 wheelbase = 0.003  # km
 
 data_length = 20000
 second_series, velocity_series, wheel_angle_series, longitude_series, latitude_series\
-    = Data.load_data(data_length, correction=1.3, conversion=17)
+    = Data.load_data(data_length, correction=0, conversion=16.3, data_name='../log/log_gps_H9_BLACK_20180902 230927.txt')
 longitude_pre_list = [longitude_series[0]]
 latitude_pre_list = [latitude_series[0]]
 yaw_pre_list = [yaw_init]
-print(0, '时刻，经度：', longitude_series[0])
-print(0, '时刻，纬度：', latitude_series[0])
-print(0, '时刻，航向：', yaw_init)
+# print(0, '时刻，经度：', longitude_series[0])
+# print(0, '时刻，纬度：', latitude_series[0])
+# print(0, '时刻，航向：', yaw_init)
 
 print('start')
 for i in range(data_length - 1):  # predict less first
@@ -48,9 +48,9 @@ for i in range(data_length - 1):  # predict less first
             (distance * sin(yaw_pre_list[i])))
         yaw_pre = yaw_pre_list[i]
 
-    print(i+1, '时刻，经度：', longitude_pre)
-    print(i+1, '时刻，纬度：', latitude_pre)
-    print(i+1, '时刻，航向：', yaw_init)
+    # print(i+1, '时刻，经度：', longitude_pre)
+    # print(i+1, '时刻，纬度：', latitude_pre)
+    # print(i+1, '时刻，航向：', yaw_init)
 
     longitude_pre_list.append(longitude_pre)
     latitude_pre_list.append(latitude_pre)

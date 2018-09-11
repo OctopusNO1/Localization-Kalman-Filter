@@ -7,15 +7,16 @@ from filter_ekf.EKF import EKF
 
 
 def run_localization(std_vel, std_steer, std_lo, std_la,
-                     us, zs, dt,
+                     us, zs, dts,
                      wheelbase, data_length,
                      ellipse_step=100):
-    ekf_ = EKF(dt, wheelbase, std_vel=std_vel, std_steer=std_steer)
-    ekf_.x = array([[117.301701, 39.116025, 3.0]]).T  # x, y, yaw
+    ekf_ = EKF(wheelbase, std_vel=std_vel, std_steer=std_steer)
+    # ekf_.x = array([[117.301701, 39.116025, 3.0]]).T  # x, y, yaw
+    ekf_.x = array([[117.383068, 39.554898, 3.33]]).T  # x, y, yaw
     ekf_.P = np.diag([0.001, 0.001, 11.1])    # yaw uncertain
     ekf_.R = np.diag([std_lo ** 2, std_la ** 2])    # measure uncertain
     # adapt
-    # Q_scale_factor = 9999.
+    Q_scale_factor = 9999.
     R_scale_factor = 9999.
     eps_max = 0.000001     # threshold一般是4，因为residual>2*standard
     imu_count = 0   # IMU惯性导航
@@ -24,7 +25,7 @@ def run_localization(std_vel, std_steer, std_lo, std_la,
     estimates = [ekf_.x]
     for i in range(data_length-1):
         # predict
-        ekf_.predict(u=us[i])
+        ekf_.predict(dt=dts[i+1]-dts[i], u=us[i])
         predicts.append(ekf_.x)
         # # # 画出predict的协方差椭圆
         # if i % ellipse_step == 0:
@@ -41,15 +42,15 @@ def run_localization(std_vel, std_steer, std_lo, std_la,
         eps = np.dot(y.T, inv(S)).dot(y)
         if eps > eps_max:   # residual big-->GPS error-->R big
             # 如何判断是GPS异常还是IMU异常？
-            # ekf_.Q *= Q_scale_factor  # IMU异常-->加大Q
+            ekf_.Q /= Q_scale_factor  # 缩小Q
             ekf_.R *= R_scale_factor    # GPS异常-->加大R
             # imu_count += 100    # 2s
             print(i, ': GPS信号异常')
         # elif imu_count > 0:
-        #     ekf_.Q /= Q_scale_factor
+        #     # ekf_.Q /= Q_scale_factor
         #     ekf_.R /= R_scale_factor
         #     imu_count -= 1
-        #     print('adapt small')
+        #     print(i, ': predict中...')
 
         estimates.append(ekf_.x)
         # 画出update后的协方差椭圆

@@ -10,9 +10,8 @@ from measure.Lidar import *
 
 
 class EKF(ExtendedKalmanFilter):
-    def __init__(self, dt, wheelbase, std_vel, std_steer):
+    def __init__(self, wheelbase, std_vel, std_steer):
         ExtendedKalmanFilter.__init__(self, 3, 2, 2)
-        self.dt = dt
         self.wheelbase = wheelbase
         self.std_vel = std_vel  # standard deviation of velocity
         self.std_steer = std_steer  # standard deviation of steering
@@ -45,14 +44,14 @@ class EKF(ExtendedKalmanFilter):
 
         # 定义变量字典save dictionary and it's variables for later use
         self.subs = {x: 0, y: 0, v: 0, a: 0,
-                     time: dt, w: wheelbase, theta: 0}
+                     time: 1/64, w: wheelbase, theta: 0}
         self.x_x, self.x_y, = x, y
         self.v, self.a, self.theta = v, a, theta
 
     # 此刻的经纬度航向，此刻的速度前轮转角-->后一刻的经纬度航向
-    def predict(self, u=0):
+    def predict(self, dt, u=0):
         # 计算x
-        self.x = IMU.move(self.x, u, self.dt)
+        self.x = IMU.move(self.x, u, dt)
 
         # 计算P
         # 代入yaw,velocity,前轮转角
