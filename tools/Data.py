@@ -55,8 +55,8 @@ def load_noise_data(data_length, correction=1.21, conversion=21, data_name='../d
     # for i in range(1000):
     #     latitude_series[16000+i] -= 0.000001*(1000-i)
     # 3、noise
-    for i in range(3000):
-        latitude_series[12000+i] += random.gauss(0, 0.0001)
+    # for i in range(3000):
+    #     latitude_series[12000+i] += random.gauss(0, 0.0001)
     return second_series, velocity_series, wheel_angle_series, longitude_series, latitude_series
 
 

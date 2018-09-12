@@ -8,7 +8,7 @@ from tools import Compute, Data
 ''' wheel velocity
     turn angle = (wheel_right - wheel_left) / wheelbase *dt
 '''
-yaw_init = 3.50     # rad,3.5
+yaw_init = 3.5     # rad,3.33
 wheelbase = 0.0015   # km，轮距
 
 data_length = 13000

@@ -14,7 +14,7 @@ def run_localization(std_vel, std_steer, std_lo, std_la,
     # ekf_.x = array([[117.301701, 39.116025, 3.0]]).T  # x, y, yaw
     ekf_.x = array([[117.383068, 39.554898, 3.33]]).T  # x, y, yaw
     ekf_.P = np.diag([0.001, 0.001, 11.1])    # yaw uncertain
-    ekf_.R = np.diag([std_lo ** 2, std_la ** 2])    # measure uncertain
+    ekf_.R = np.diag([std_lo ** 2, std_la ** 2])    # R, measure uncertain
     # adapt
     Q_scale_factor = 9999.
     R_scale_factor = 9999.

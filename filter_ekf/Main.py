@@ -1,7 +1,7 @@
 
 import matplotlib.pyplot as plt
 
-from tools import Data
+from tools import Data, Compute
 from filter_ekf.Fusion import *
 
 
@@ -25,8 +25,10 @@ for (longitude, latitude) in zip(longitude_series, latitude_series):
 ekf_, predicts, estimates = run_localization(std_vel=0.01, std_steer=np.radians(0.01), std_lo=0.3, std_la=0.1,
                             us=us, zs=zs, dts=second_series, wheelbase=wheelbase, data_length=data_length)
 
-print('Final P/covariance:', ekf_.P.diagonal())
-print('Final y/residual:', ekf_.y)
+print('longitude rmse: ', Compute.root_mean_square_error(longitude_series, estimates[:, 0]))    # 与正确GPS的差距
+print('latitude rmse', Compute.root_mean_square_error(latitude_series, estimates[:, 1]))    #
+print('Final P/covariance:', ekf_.P.diagonal())     # 协方差——越小越集中越确定
+print('Final y/residual:', ekf_.y)      # predict与measure的差
 # plt.scatter(true_longitude_series, true_latitude_series, color='b', label='true')
 plt.scatter(longitude_series, latitude_series, color='b', label='measure')
 # plt.scatter(predicts[:, 0], predicts[:, 1],  color='r', label='predict')
