@@ -11,7 +11,7 @@ from tools import Compute, Data
 yaw_init = 3.5     # rad,3.33
 wheelbase = 0.0015   # km，轮距
 
-data_length = 13000
+data_length = 20000
 second_series, velocity_series, car_steering_velocity_series, longitude_series, latitude_series\
     = Data.load_wheel_data(data_length, wheelbase=wheelbase, data_name='../log/log_gps_H9_BLACK_20180902 230927.txt')
 

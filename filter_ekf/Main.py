@@ -29,6 +29,7 @@ print('longitude rmse: ', Compute.root_mean_square_error(longitude_series, estim
 print('latitude rmse', Compute.root_mean_square_error(latitude_series, estimates[:, 1]))    #
 print('Final P/covariance:', ekf_.P.diagonal())     # 协方差——越小越集中越确定
 print('Final y/residual:', ekf_.y)      # predict与measure的差
+
 # plt.scatter(true_longitude_series, true_latitude_series, color='b', label='true')
 plt.scatter(longitude_series, latitude_series, color='b', label='measure')
 # plt.scatter(predicts[:, 0], predicts[:, 1],  color='r', label='predict')
