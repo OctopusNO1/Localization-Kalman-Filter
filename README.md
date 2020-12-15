@@ -1,6 +1,5 @@
 # Localization-Kalman-Filter
-robot localization by kalman filter  
-18.7 ZhangYu,autobrain
+robot localization by kalman filter. 18.7 ZhangYu,autobrain
 
 ## multi-sensor fusion localization：
 1. GPS  
